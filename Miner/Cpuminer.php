@@ -13,7 +13,10 @@ class Cpuminer extends MinerAbstract implements MinerInterface
             return 'cpuminer';
         }
     }
-    static function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName = '', string $os = self::OS_LINUX ): false | int
+    /**
+     * @return false | int
+     */
+    static function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName = '', string $os = self::OS_LINUX )
     {
         if (!$processName) {
             $processName = self::getMinerProcessName($os);

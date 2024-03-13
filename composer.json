@@ -14,7 +14,7 @@
 		"php": ">=7.0.0",
 		"phpseclib/phpseclib": "~3.0",
 		"codenix-sv/coingecko-api": "^1.0",
-		"monolog/monolog": "^3.5"
+		"monolog/monolog": "^2.9"
 	},
 	"autoload": {}
 }

@@ -9,11 +9,11 @@ use Monolog\Level;
 use phpseclib3\Net\SSH2;
 
 abstract class MinerAbstract implements MinerInterface {
-    final const MINER_NAMES = ['xmrig', 'cpuminer', 'cpuminer-sse2']; // names of miners processes
-    final const OS_WINDOWS = 'WIN';
-    final const OS_LINUX = 'LINUX';
-    final const CPU_AMD = 'AMD';
-    final const CPU_INTEL = 'INTEL';
+    const MINER_NAMES = ['xmrig', 'cpuminer', 'cpuminer-sse2']; // names of miners processes
+    const OS_WINDOWS = 'WIN';
+    const OS_LINUX = 'LINUX';
+    const CPU_AMD = 'AMD';
+    const CPU_INTEL = 'INTEL';
     const LOGGER_LEVEL = LOGGER_LEVEL; // LOGGER_LEVEL - config constant
     protected $os = self::OS_LINUX;
     protected $name = ''; // name of miner process
@@ -64,7 +64,10 @@ abstract class MinerAbstract implements MinerInterface {
         return '';
     }
 
-    static function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName, string $os = self::OS_LINUX ): false | int
+    /**
+     * @return false | int
+     */
+    static function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName, string $os = self::OS_LINUX )
     {
         if (!$processName) {
             $processName = self::getMinerProcessName();
@@ -158,7 +161,10 @@ abstract class MinerAbstract implements MinerInterface {
         return false;
     }
 
-    static function execWithLogger(phpseclib3\Net\SSH2 $ssh, string $command, Monolog\Logger $logger, string $message, array $context = []): bool | string 
+    /**
+     * @return bool | string 
+     */
+    static function execWithLogger(phpseclib3\Net\SSH2 $ssh, string $command, Monolog\Logger $logger, string $message, array $context = [])
     {
         try {
             $output = $ssh->exec($command);
