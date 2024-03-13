@@ -4,3 +4,5 @@ messages.txt
 settings.txt
 blocks.txt
 vendor/
+*.log
+.editorconfig

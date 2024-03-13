@@ -1,0 +1,63 @@
+<?php
+require_once __DIR__ . '/MinerAbstract.php';
+require_once __DIR__ . '/MinerInterface.php';
+
+class Xmrig extends MinerAbstract implements MinerInterface
+{
+    
+    static function getMinerProcessName(string $os = ''): string
+    {
+        return 'xmrig';
+    }
+    static function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName = '', string $os = self::OS_LINUX ): false | int
+    {
+        if (!$processName) {
+            $processName = self::getMinerProcessName($os);
+        }
+        return parent::detectProcess($ssh, $host, $password, $processName, $os);
+    }
+
+    /**
+     * @return string time | hashrate | pool
+     */
+    public function getParseLogCommand( string $cpu = '' ): string
+    {
+        if ($this->os == self::OS_WINDOWS) {
+            // не должно быть переводов строк для powershell
+            return 
+                "powershell -Command \""
+                    ."Select-String -Path '{$this->logPath}' -Pattern 'speed' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[1,5] -Join '|'};"
+                    ."'|';"
+                    ."Select-String -Path '{$this->logPath}' -Pattern 'new job' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[6]};"
+                ."\"";
+        } else {
+            return "
+                echo $( timeout 1 tail -f {$this->logPath} | grep -m 1 'speed' | awk '/speed/ {print $2 \"|\" $6}' );
+                echo \"|\"; 
+                echo $( timeout 1 tail -f {$this->logPath} | grep -m 1 'new job' | awk '/new job/ {print $7}' );
+            ";
+        }  
+    }
+
+    public function start( string $algo, string $host, string $user, string $pass = 'x', ?string $threads = null, string $args = '' ): bool
+    {
+        $output = '';
+        if ($threads) {
+            $args = '-t ' . $threads . ' ' . $args;
+        }
+
+        if ($this->os == self::OS_WINDOWS) {
+            $command = "psexec -s -d -i 1 \"{$this->path}\" -a $algo -o $host -u $user -p $pass --log-file=\"{$this->logPath}\" $args ";
+            $output = self::execWithLogger($this->ssh, $command, $this->logger, "$this->host ".__FUNCTION__.' Exec');
+            return stripos($output, 'with process ID') !== false;
+        } else {
+            $command = "
+                timeout 1 echo '{$this->password}' | sudo -S screen -dmS xmrig \"{$this->path}\" -a $algo -o $host -u $user -p $pass --randomx-1gb-pages --log-file=\"{$this->logPath}\" $args;
+                timeout 1 echo '{$this->password}' | sudo -S screen -ls | awk '{print $1}';
+            ";
+            $output = self::execWithLogger($this->ssh, $command, $this->logger, "$this->host ".__FUNCTION__.' Exec');
+            return stripos($output, $this->name) !== false; //  $this->name == xmrig
+        }
+        return false;
+    }
+}
