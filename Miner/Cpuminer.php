@@ -23,23 +23,26 @@ class Cpuminer extends MinerAbstract implements MinerInterface
         }
         return parent::detectProcess($ssh, $host, $password, $processName, $os);
     }
-
+    
+    /**
+     * @return string "pool | time | hashrate"
+     */
     public function getParseLogCommand( string $cpu = '' ): string
     {
         if ($this->os == self::OS_WINDOWS) {
             // не должно быть переводов строк для powershell
             return 
                 "powershell -Command \""
-                    ."Select-String -Path '{$this->logPath}' -Pattern 'Accepted' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[1,7] -Join '|'};"
-                    ."'|';"
                     ."Select-String -Path '{$this->logPath}' -Pattern 'network' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[2]};"
+                    ."'|';"
+                    ."Select-String -Path '{$this->logPath}' -Pattern 'Accepted' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[1,7] -Join '|'};"
                 ."\"";
 
         } else {
             return "
-                echo $( timeout 1 tail -f {$this->logPath} | grep -m 1 'Accepted' | awk '/Accepted/ {print $2 \"|\" $8}' );
-                echo \"|\"; 
                 echo $( timeout 1 tail -f {$this->logPath} | grep -m 1 'network' | awk '/network/ {print $3}' );
+                echo \"|\"; 
+                echo $( timeout 1 tail -f {$this->logPath} | grep -m 1 'Accepted' | awk '/Accepted/ {print $2 \"|\" $8}' );
             ";
         }  
         return '';

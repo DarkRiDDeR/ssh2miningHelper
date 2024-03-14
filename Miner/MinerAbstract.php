@@ -117,7 +117,7 @@ abstract class MinerAbstract implements MinerInterface {
     }
 
     /**
-     * @return array Statistics: array(time, hashrate, pool) || array()
+     * @return array Statistics: array(pool, time, hashrate) || array()
      */
     public function getStatisticsFromMinerLog ( string $cpu = '' ): array
     {
@@ -126,17 +126,18 @@ abstract class MinerAbstract implements MinerInterface {
         $command = $this->getParseLogCommand($cpu);
         $this->logger->debug("$this->host ".__FUNCTION__.' Command', ["Command" => $command]);
         try {
-            $output = $this->ssh->exec($command);
+            $output = (string)$this->ssh->exec($command);
 			$expl 	= explode("|", $output);
-
-            if (count($expl) != 3) {
+            // linux: tail: cannot open '/home/m2680/xmrig-6.21.0-don0/xmrig.log' 
+            // win: Select-String : Cannot find path 
+            if (count($expl) == 1 || stripos($output, ' cannot ')) {
                 $this->logger->warning("$this->host ".__FUNCTION__." Incorrect data from the log", [ "Output" => $output]);
                 return $r;
             } 
-			$time 	= preg_replace('/^([^\.\]\s]*).*$/', '$1', $expl[0]); // Example: 21:00:38.871], 21:00:38]
+			$r['pool'] 		= trim($expl[0]);
+			$time 	= preg_replace('/^([^\.\]\s]*).*$/', '$1', trim($expl[1])); // Example: 21:00:38.871], 21:00:38]
 			$r['time'] 		= $time ? date("H:i:s", strtotime($time)) : '';
-			$r['hashrate'] 	= round(((float)$expl[1] ?? 0));
-			$r['pool'] 		= trim($expl[2]??'');
+			$r['hashrate'] 	= round((float)($expl[2] ?? 0));
             $this->logger->debug("$this->host ".__FUNCTION__." Exec", [ "Output" => $output, 'Result' => $r]);
         } catch (\Exception $e) {
             $this->logger->error("$this->host ".__FUNCTION__." Exec", [ "Error:" => $e->getMessage() , "Output" => $output, 'Result' => $r]);

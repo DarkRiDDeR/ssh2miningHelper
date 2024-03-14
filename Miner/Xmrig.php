@@ -21,7 +21,7 @@ class Xmrig extends MinerAbstract implements MinerInterface
     }
 
     /**
-     * @return string time | hashrate | pool
+     * @return string "pool | time | hashrate"
      */
     public function getParseLogCommand( string $cpu = '' ): string
     {
@@ -29,15 +29,15 @@ class Xmrig extends MinerAbstract implements MinerInterface
             // не должно быть переводов строк для powershell
             return 
                 "powershell -Command \""
-                    ."Select-String -Path '{$this->logPath}' -Pattern 'speed' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[1,5] -Join '|'};"
-                    ."'|';"
                     ."Select-String -Path '{$this->logPath}' -Pattern 'new job' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[6]};"
+                    ."'|';"
+                    ."Select-String -Path '{$this->logPath}' -Pattern 'speed' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[1,5] -Join '|'};"
                 ."\"";
         } else {
             return "
-                echo $( timeout 1 tail -n -20 -f {$this->logPath} | grep -m 1 'speed' | awk '/speed/ {print $2 \"|\" $6}' );
-                echo \"|\"; 
                 echo $( timeout 1 tail -n -20 -f {$this->logPath} | grep -m 1 'new job' | awk '/new job/ {print $7}' );
+                echo \"|\"; 
+                echo $( timeout 1 tail -f {$this->logPath} | grep -m 1 'speed' | awk '/speed/ {print $2 \"|\" $6}' );
             ";
         }  
     }
