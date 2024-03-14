@@ -144,11 +144,8 @@ foreach($arr as $v)
 	{
 		$cpuminer = new Cpuminer($ssh, $v['host'], $v['pass'], $v['miners']['cpuminer']['path'], $v['miners']['cpuminer']['log'], $os);
 		//$cpu = $cpuminer->getCpuFamily();
-		// issue #3 надо решить проблему чтения параметров майнера для Windows
 		$arStatistics = [];
-		if ($os != 'WIN') {
-			$arStatistics = $cpuminer->getStatisticsFromMinerLog();
-		}
+		$arStatistics = $cpuminer->getStatisticsFromMinerLog();
 		$arWorker = array_merge($arWorker, $arStatistics);
 		$arWorker['session']  = 'cpuminer';// . ".$cpu";
 		goto finishWorker;

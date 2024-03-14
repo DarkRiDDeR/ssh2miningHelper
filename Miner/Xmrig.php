@@ -35,9 +35,9 @@ class Xmrig extends MinerAbstract implements MinerInterface
                 ."\"";
         } else {
             return "
-                echo $( timeout 1 tail -f {$this->logPath} | grep -m 1 'speed' | awk '/speed/ {print $2 \"|\" $6}' );
+                echo $( timeout 1 tail -n -20 -f {$this->logPath} | grep -m 1 'speed' | awk '/speed/ {print $2 \"|\" $6}' );
                 echo \"|\"; 
-                echo $( timeout 1 tail -f {$this->logPath} | grep -m 1 'new job' | awk '/new job/ {print $7}' );
+                echo $( timeout 1 tail -n -20 -f {$this->logPath} | grep -m 1 'new job' | awk '/new job/ {print $7}' );
             ";
         }  
     }

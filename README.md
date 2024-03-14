@@ -4,7 +4,7 @@ This project is created to monitor the status of mining builds for CPU. The READ
 
 | Miner                | Linux OS                 |   Windows OS                                   |
 | -------------------- | ------------------------ | ---------------------------------------------- |
-| Cpuminer-opt-Rplant  | **+**                    | **+-**  (controling, detect, but no monitoring hashrate, time, pool) |
+| Cpuminer-opt-Rplant  | **+**                    | **+**                                          |
 | Qubic                | **+**                    | **-**                                          |
 | Xmrig                | **+**                    | **+**                                          |
 

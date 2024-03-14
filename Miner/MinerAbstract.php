@@ -130,6 +130,7 @@ abstract class MinerAbstract implements MinerInterface {
 			$expl 	= explode("|", $output);
 
             if (count($expl) != 3) {
+                $this->logger->warning("$this->host ".__FUNCTION__." Incorrect data from the log", [ "Output" => $output]);
                 return $r;
             } 
 			$time 	= preg_replace('/^([^\.\]\s]*).*$/', '$1', $expl[0]); // Example: 21:00:38.871], 21:00:38]

@@ -28,14 +28,12 @@ class Cpuminer extends MinerAbstract implements MinerInterface
     {
         if ($this->os == self::OS_WINDOWS) {
             // не должно быть переводов строк для powershell
-            /*return 
+            return 
                 "powershell -Command \""
-                    ."Select-String -Path '{$this->logPath}' -Pattern 'Accepted' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[1]};"
-                    ."'|';"
-                    ."Select-String -Path '{$this->logPath}' -Pattern 'Accepted' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[7]};"
+                    ."Select-String -Path '{$this->logPath}' -Pattern 'Accepted' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[1,7] -Join '|'};"
                     ."'|';"
                     ."Select-String -Path '{$this->logPath}' -Pattern 'network' | Select -Last 1 | ForEach-Object{(\$_ -split '\s+')[2]};"
-                ."\"";*/
+                ."\"";
 
         } else {
             return "
@@ -55,7 +53,7 @@ class Cpuminer extends MinerAbstract implements MinerInterface
         }
 
         if ($this->os == self::OS_WINDOWS) {
-            $command = "psexec -s -d -i 1 \"{$this->path}\" -a $algo -o $host -u $user -p $pass $args > \"{$this->logPath}\"";
+            $command = "psexec -s -d -i 1 cmd /c \"{$this->path} -a $algo -o $host -u $user -p $pass $args > {$this->logPath}\"";
             $output = self::execWithLogger($this->ssh, $command, $this->logger, "$this->host ".__FUNCTION__.' Exec');
             return stripos($output, 'with process ID') !== false;
         } else {
