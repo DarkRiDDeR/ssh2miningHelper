@@ -11,6 +11,7 @@ header("Pragma: no-cache");
 
 
 require_once "config.php";
+require_once "./Miner/MinerAbstract.php";
 require_once "./Miner/Xmrig.php";
 require_once "./Miner/CpuMiner.php";
 use phpseclib3\Net\SSH2;
@@ -131,7 +132,8 @@ foreach($arr as $v)
 		//-->
 	}
 
-	if (Xmrig::detectProcess($ssh, $v['host'], $v['pass'], null, $os))
+	$arProcesses = MinerAbstract::detectAllProcesses($ssh, $v['host'], $v['pass'], [], $os);
+	if (in_array(Xmrig::getMinerProcessName($os), $arProcesses))
 	{
 		$xmrig = new Xmrig($ssh, $v['host'], $v['pass'], $v['miners']['xmrig']['path'], $v['miners']['xmrig']['log'], $os);
 		//$cpu = $xmrig->getCpuFamily();
@@ -140,7 +142,7 @@ foreach($arr as $v)
 		$arWorker['session']  = 'xmrig'; // . $cpu
 		goto finishWorker;
 
-	} elseif (Cpuminer::detectProcess($ssh, $v['host'], $v['pass'], null, $os))
+	} elseif (in_array(Cpuminer::getMinerProcessName($os), $arProcesses))
 	{
 		$cpuminer = new Cpuminer($ssh, $v['host'], $v['pass'], $v['miners']['cpuminer']['path'], $v['miners']['cpuminer']['log'], $os);
 		//$cpu = $cpuminer->getCpuFamily();

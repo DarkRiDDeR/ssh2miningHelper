@@ -9,7 +9,7 @@ use Monolog\Level;
 use phpseclib3\Net\SSH2;
 
 abstract class MinerAbstract implements MinerInterface {
-    const MINER_NAMES = ['xmrig', 'cpuminer', 'cpuminer-sse2']; // names of miners processes
+    const MINER_NAMES = ['xmrig', 'cpuminer', 'cpuminer-sse2', 'rqiner', 'rqiner-x86']; // names of miners processes
     const OS_WINDOWS = 'WIN';
     const OS_LINUX = 'LINUX';
     const CPU_AMD = 'AMD';
@@ -62,6 +62,47 @@ abstract class MinerAbstract implements MinerInterface {
             return self::CPU_INTEL;
         }
         return '';
+    }
+
+    /**
+     * @return array element [pid => name]
+     */
+    static function detectAllProcesses ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, array $processesForDetecting = [], string $os = self::OS_LINUX ): array
+    {
+        // Get-Process | Where-Object {$_.ProcessName -match "rqiner-x86|xmrig"} | ForEach-Object {"|$($_.Id).$($_.ProcessName)"}
+        // result: |2848.rqiner-x86
+        // echo 'password' | sudo -S screen -ls | awk '{print "|" $1}'
+        // result: |1754.qubic
+        $logger = new Logger(__CLASS__);
+        $streamHandler = new StreamHandler("./log/{".__CLASS__."}.log", self::LOGGER_LEVEL);
+        $logger->pushHandler($streamHandler);
+
+        $processesForDetecting = $processesForDetecting ?: self::MINER_NAMES;
+        $strDetecting = implode('|', $processesForDetecting);
+        $r = [];
+        $command = '';
+        if (strtoupper(trim($os)) == self::OS_WINDOWS) {
+            $command = "powershell -Command \"Get-Process | Where-Object {\$_.ProcessName -match '$strDetecting'} | ForEach-Object {'|';\$_.Id;'.';\$_.ProcessName}\"";
+        } else {
+            $command = "echo '$password' | sudo -S screen -ls | awk '{print \"|\" $1}'";
+        }
+
+        $output = self::execWithLogger($ssh, $command, $logger, "$host ".__FUNCTION__.' Exec');
+        if ($output) {
+            $ar = explode('|', $output);
+            if (count($ar) > 1) {
+                foreach ($ar as $v) {
+                    $arProcess = explode('.', $v);
+                    if (count($arProcess) > 1) {
+                        $name = trim($arProcess[1]);
+                        if (in_array($name, $processesForDetecting)) {
+                            $r[trim($arProcess[0])] = $name;
+                        }
+                    }
+                }
+            }
+        }
+        return $r;
     }
 
     /**
