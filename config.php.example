@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
-use Monolog\Level;
+use Monolog\Logger;
 
-define('LOGGER_LEVEL', Level::Warning); // Level::Debug
+define('LOGGER_LEVEL', Logger::WARNING); // Logger::DEBUG
 
 $qubic_user = "guest@qubic.li";
 $qubic_pass	= "guest13@Qubic.li";
