@@ -106,6 +106,7 @@ $tb_miners = "<table class=\"table table-striped qubicStat\">
 	<th>Active</th>
 	<th>Last</th>
 	<th>Its</th>
+	<th>Version</th>
 </tr>
 </thead>
 <tbody>";
@@ -123,6 +124,7 @@ if(isset($GetMiner['miners']))
 			<td>".(empty($miner['isActive'])? '':'On')."</td>
 			<td>".date("H:i", strtotime($miner['lastActive'])+7200)."</td>
 			<td>$miner[currentIts]</td>
+			<td>".$miner['version']['versionString']."</td>
 		</tr>";
 	}
 }
@@ -204,11 +206,13 @@ Estimated income per 1 it/s per day: <b>" . number_format($incomerPerOneITS, 4) 
 Your estimated income per day: <b>" . number_format($totalIts * $incomerPerOneITS, 2) . "$</b><br>
 Estimated income per 1 sol: <b>" . number_format($curSolPrice, 2) . "$</b><br>
 Your estimated sols per day: <b>" . number_format(24 * $totalIts * $netSolsPerHour / $netHashrate, 1) . "</b><br>
+Your estimated per epoch SOL: <b>" . number_format(168 * $totalIts * $netSolsPerHour / $netHashrate, 1) . "</b>, 
+		USD: <b>" . number_format($curSolPrice * (168 * $totalIts * $netSolsPerHour / $netHashrate), 1) . "$</b><br>
 <br>
 ";
 if($totalSolutions > 0)
 {
-	$bd .= "Total on this epoch: <b>" . number_format($curSolPrice * $totalSolutions, 2) . "$</b>";
+	$bd .= "In this epoch, you received: <b>" . number_format($curSolPrice * $totalSolutions, 2) . "$</b>";
 }
 echo json_encode([
 	'body' => $bd, 
