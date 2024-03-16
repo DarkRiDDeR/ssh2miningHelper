@@ -76,8 +76,14 @@ class Rqiner extends MinerAbstract implements MinerInterface
             if (count($expl) == 1 || stripos($output, ' cannot ')) {
                 $this->logger->warning("$this->host ".__FUNCTION__." Incorrect data from the log", [ "Output" => $output]);
                 return $r;
-            } 
-			$r['time'] = preg_replace('/^.*T(.*?Z).*$/su', '$1', $expl[0]);
+            }
+            $matches = [];
+            if (preg_match('/^.*?\[(?:0m)?(20.*?Z).*$/su', $expl[0], $matches))
+            {
+                $date = new DateTime($matches[1], new DateTimeZone('UTC'));
+                $date->setTimezone(new DateTimeZone(date_default_timezone_get()));
+                $r['time'] = $date->format('H:i:s');
+            }
 			$r['pool'] = substr($expl[1], 0, $this->os == self::OS_WINDOWS ? -1 : -10);
 			$r['hashrate'] 	= (float)($expl[2] ?? 0);
 			$r['solutions'] 	= (int)($expl[3] ?? 0);
