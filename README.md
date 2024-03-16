@@ -2,14 +2,16 @@
 
 This project is created to monitor the status of mining builds for CPU. The README provides instructions for setting up and using the SSH2miningHelper.
 
-| Miner                | Linux OS                 |   Windows OS                                   |
-| -------------------- | ------------------------ | ---------------------------------------------- |
-| Cpuminer-opt-Rplant  | **+**                    | **+**                                          |
-| Qubic                | **+**                    | **-**                                          |
-| Xmrig                | **+**                    | **+**                                          |
+| Miner                | Linux OS                    |   Windows OS                                   |
+| -------------------- | --------------------------- | ---------------------------------------------- |
+| Cpuminer-opt-Rplant  | **+**                       | **+**                                          |
+| Rqine                | **+-** (no pool monitoring) | **+-** (no pool monitoring)                    |
+| Qubic.li             | **+**                       | **-**                                          |
+| Xmrig                | **+**                       | **+**                                          |
 
 - Cpuminer-opt-Rplant - https://github.com/rplant8/cpuminer-opt-rplant/releases
-- Qubic - https://github.com/qubic-li/client
+- Rqiner(Qubic) - https://github.com/Qubic-Solutions/rqiner-builds (statistics https://pooltemp.qubic.solutions/info?miner=YourPayoutId)
+- Qubic.li - https://github.com/qubic-li/client
 - Xmrig - https://github.com/xmrig/xmrig/releases
 
 Demo: ![ScreenShot](/screenshot.png)

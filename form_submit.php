@@ -11,6 +11,7 @@ error_reporting(E_ALL);
 require_once "config.php";
 require_once "./Miner/Xmrig.php";
 require_once "./Miner/CpuMiner.php";
+require_once "./Miner/Rqiner.php";
 use phpseclib3\Net\SSH2;
 
 if(isset($_POST['command']))
@@ -66,12 +67,20 @@ if(isset($_POST['command']))
 				$arDebug['killAllMiners'] = $xmrig->killAllMiners();
 				$arDebug['removeLog'] = $xmrig->removeLog();
 				$arDebug['start'] = $xmrig->start($_POST['algo'], $_POST['host'], $_POST['user'].'.'.$v['worker'], $_POST['pass'], $t);		
-			} elseif($_POST['miner'] == 'cpuminer' && !empty($v['miners']['cpuminer']))
+			}
+			elseif($_POST['miner'] == 'cpuminer' && !empty($v['miners']['cpuminer']))
 			{
 				$cpuminer = new Cpuminer($ssh, $v['host'], $v['pass'], $v['miners']['cpuminer']['path'], $v['miners']['cpuminer']['log'], $os);
 				$arDebug['killAllMiners'] = $cpuminer->killAllMiners();
 				//$arDebug['removeLog']	= $cpuminer->removeLog(); // вывод терминала пишется каждый раз в файл заново
 				$arDebug['start'] = $cpuminer->start($_POST['algo'], $_POST['host'], $_POST['user'].'.'.$v['worker'], $_POST['pass'], $t);		
+			}
+			elseif($_POST['miner'] == 'rqiner' && !empty($v['miners']['rqiner']))
+			{
+				$rqiner = new Rqiner($ssh, $v['host'], $v['pass'], $v['miners']['rqiner']['path'], $v['miners']['rqiner']['log'], $os);
+				$arDebug['killAllMiners'] = $rqiner->killAllMiners();
+				$arDebug['removeLog']	= $rqiner->removeLog();
+				$arDebug['start'] = $rqiner->start($_POST['algo'], $_POST['host'], $_POST['user'], $_POST['pass'], $t);		
 			}
 		}
 

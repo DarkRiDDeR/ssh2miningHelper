@@ -266,6 +266,7 @@ use phpseclib3\Net\SSH2;
 							<option value="xmrig">xmrig</option>
 							<option value="cpuminer">cpuminer</option>
 							<option value="srbminer">srbminer</option>
+							<option value="rqiner">rqiner</option>
 						</select>
 						<select name="workers[]" id="lomake_workers" class="form-control selectpicker" multiple>
 						<?php
@@ -1105,7 +1106,7 @@ $(document).ready(function(){
 						$("#worker_" + value['id']).addClass('bg-danger');
 					}
 
-					if(value['session'] && value['session'] == 'QUBIC')
+					if(value['session'] && (value['session'] == 'QUBIC'))
 					{
 						QUBIC = true;
 						qubic_worker.push(value['id']);

@@ -14,6 +14,7 @@ require_once "config.php";
 require_once "./Miner/MinerAbstract.php";
 require_once "./Miner/Xmrig.php";
 require_once "./Miner/CpuMiner.php";
+require_once "./Miner/Rqiner.php";
 use phpseclib3\Net\SSH2;
 
 $return = [];
@@ -142,14 +143,20 @@ foreach($arr as $v)
 		$arWorker['session']  = 'xmrig'; // . $cpu
 		goto finishWorker;
 
-	} elseif (in_array(Cpuminer::getMinerProcessName($os), $arProcesses))
-	{
+	} elseif (in_array(Cpuminer::getMinerProcessName($os), $arProcesses)) {
 		$cpuminer = new Cpuminer($ssh, $v['host'], $v['pass'], $v['miners']['cpuminer']['path'], $v['miners']['cpuminer']['log'], $os);
 		//$cpu = $cpuminer->getCpuFamily();
 		$arStatistics = [];
 		$arStatistics = $cpuminer->getStatisticsFromMinerLog();
 		$arWorker = array_merge($arWorker, $arStatistics);
 		$arWorker['session']  = 'cpuminer';// . ".$cpu";
+		goto finishWorker;
+	} elseif (in_array(Rqiner::getMinerProcessName($os), $arProcesses)) {
+		$rqiner = new Rqiner($ssh, $v['host'], $v['pass'], $v['miners']['rqiner']['path'], $v['miners']['rqiner']['log'], $os);
+		$arStatistics = [];
+		$arStatistics = $rqiner->getStatisticsFromMinerLog();
+		$arWorker = array_merge($arWorker, $arStatistics);
+		$arWorker['session']  = 'rqiner';
 		goto finishWorker;
 	}
 
