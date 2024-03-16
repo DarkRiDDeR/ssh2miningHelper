@@ -9,7 +9,7 @@ use Monolog\Level;
 use phpseclib3\Net\SSH2;
 
 abstract class MinerAbstract implements MinerInterface {
-    const MINER_NAMES = ['xmrig', 'cpuminer', 'cpuminer-sse2', 'rqiner', 'rqiner-x86']; // names of miners processes
+    const MINER_NAMES = ['xmrig', 'cpuminer', 'cpuminer-sse2', 'rqiner', 'rqiner-x86', 'srbminer-multi']; // names of miners processes
     const OS_WINDOWS = 'WIN';
     const OS_LINUX = 'LINUX';
     const CPU_AMD = 'AMD';
@@ -104,36 +104,6 @@ abstract class MinerAbstract implements MinerInterface {
         }
         return $r;
     }
-
-    /**
-     * @return false | int
-     */
-    static function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName, string $os = self::OS_LINUX )
-    {
-        if (!$processName) {
-            $processName = self::getMinerProcessName();
-        }
-        $logger = new Logger(__CLASS__);
-        $streamHandler = new StreamHandler("./log/{".__CLASS__."}.log", self::LOGGER_LEVEL);
-        $logger->pushHandler($streamHandler);
-    
-        $matches =[];
-        if (strtoupper(trim($os)) == self::OS_WINDOWS) {
-            $command = 'tasklist /FI "IMAGENAME eq ' . $processName . '.exe"';
-            $output = self::execWithLogger($ssh, $command, $logger, "$host ".__FUNCTION__.' Exec');
-            if ($output !== false && preg_match("/\s{$processName}\.exe\s+(\d+)/i", $output, $matches)) {
-                return $matches[1];
-            }
-        } else {
-            $command = "echo $( timeout 1 echo '$password' | sudo -S screen -ls | grep " . $processName . " )";
-            $output = self::execWithLogger($ssh, $command, $logger, "$host ".__FUNCTION__.' Exec');
-            if ($output !== false && preg_match("/\s*(\d+)\.{$processName}\s+/imu", $output, $matches)) {
-                return $matches[1];
-            }
-        }
-        return false;
-    }
-
 
     /**
      * Kill all miners

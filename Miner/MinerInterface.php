@@ -5,7 +5,6 @@ interface MinerInterface
     /**
      * @return false | int
      */
-    static public function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName, string $os);
     static public function getMinerProcessName( string $os = '' ): string;
     public function getParseLogCommand( string $cpu = '' ): string;
     public function getStatisticsFromMinerLog( string $cpu = '' ): array;

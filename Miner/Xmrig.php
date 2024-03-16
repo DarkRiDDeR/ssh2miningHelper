@@ -9,16 +9,6 @@ class Xmrig extends MinerAbstract implements MinerInterface
     {
         return 'xmrig';
     }
-    /**
-     * @return false | int
-     */
-    static function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName = '', string $os = self::OS_LINUX )
-    {
-        if (!$processName) {
-            $processName = self::getMinerProcessName($os);
-        }
-        return parent::detectProcess($ssh, $host, $password, $processName, $os);
-    }
 
     /**
      * @return string "pool | time | hashrate"

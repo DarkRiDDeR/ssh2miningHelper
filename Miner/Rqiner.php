@@ -14,17 +14,6 @@ class Rqiner extends MinerAbstract implements MinerInterface
         }
     }
 
-    /**
-     * @return false | int
-     */
-    static function detectProcess ( phpseclib3\Net\SSH2 $ssh, string $host, string $password, ?string $processName = '', string $os = self::OS_LINUX )
-    {
-        if (!$processName) {
-            $processName = self::getMinerProcessName($os);
-        }
-        return parent::detectProcess($ssh, $host, $password, $processName, $os);
-    }
-
     public function start( string $algo, string $host, string $user, string $pass = 'x', ?string $threads = null, string $args = '' ): bool
     {
         $output = '';
