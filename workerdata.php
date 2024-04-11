@@ -48,40 +48,34 @@ foreach($arr as $v)
 		goto finishWorker;
 	}
 
-	try {
-
-		// --- Создаем новый объект SSH2 и подключаемся к серверу --- //
-		$ssh = new SSH2($v['host']);
-		if (!$ssh->login($v['user'], $v['pass'])) {
-			goto finishWorker;
-		}
-
-	} catch (\Exception $e) {
-		goto finishWorker;
-	}
-
-
+	$ssh = null;
 	$os = isset($v['os']) ? strtoupper(trim($v['os'])) : '';
 
 	// OS Windows
 	if ($os  == "WIN")
 	{
-		// --- TEMPERATURES from Open Hardware Monitor --- //
-		$ohmPort = $v['port'] ?? OPEN_HARDWARE_MONITOR_DEFAULT_PORT;
-		$ctx = stream_context_create(['http'=> ['timeout' => 1]]);
-		$jd = @file_get_contents("http://{$v['host']}:{$ohmPort}/data.json", false, $ctx);
-		if ($jd) {
-			$jd = json_decode($jd, true); // data from  Web server
-			$arWorker['temperature'] = [];
-			if ($jd['Text'] == "Sensor" && isset($jd['Children'][0]['Children']))
-			{
-				foreach($jd['Children'][0]['Children'] as $arDevice) { // CPU, GPU RAM
-					if (preg_match('/^(Intel|AMD)\s/iu', $arDevice['Text'])) {
-						foreach ($arDevice['Children'] as $arGroup) { // CLocks, Temperatures, Powers
-							if (strtolower($arGroup['Text']) == 'temperatures') {
-								foreach ($arGroup['Children'] as $arTempers) {
-									if (strtolower($arTempers['Text']) == 'cpu package'){
-										$arWorker['temperature'][] = '+' . $arTempers['Value'];
+		try {
+			// --- TEMPERATURES from Open Hardware Monitor --- //
+			$ohmPort = $v['port'] ?? OPEN_HARDWARE_MONITOR_DEFAULT_PORT;
+			$ctx = stream_context_create(['http'=> ['timeout' => 1]]);
+			$jd = @file_get_contents("http://{$v['host']}:{$ohmPort}/data.json", false, $ctx);
+
+			if ($jd === false) {
+				$error = error_get_last();
+				throw new Error('HTTP request failed: ' . $error['message']);
+			} else {
+				$jd = mb_convert_encoding($jd, 'UTF-8', 'WINDOWS-1251');
+				$jd = json_decode($jd, true, 512, JSON_THROW_ON_ERROR); // data from  Web server
+				$arWorker['temperature'] = [];
+				if ($jd['Text'] == "Sensor" && isset($jd['Children'][0]['Children'])){
+					foreach($jd['Children'][0]['Children'] as $arDevice) { // CPU, GPU RAM
+						if (preg_match('/^(Intel|AMD)\s/iu', $arDevice['Text'])) {
+							foreach ($arDevice['Children'] as $arGroup) { // CLocks, Temperatures, Powers
+								if (strtolower($arGroup['Text']) == 'temperatures') {
+									foreach ($arGroup['Children'] as $arTempers) {
+										if (strtolower($arTempers['Text']) == 'cpu package'){
+											$arWorker['temperature'][] = preg_replace('/^.*?([\d,\.]+).*$/u', '+$1 °C', $arTempers['Value']);
+										}
 									}
 								}
 							}
@@ -89,10 +83,32 @@ foreach($arr as $v)
 					}
 				}
 			}
+		} catch (\Exception $e) {
+			//print_r(['Error getting temperature for ' . $v['host'], $e]);
+			goto finishWorker;
+		}
+		
+		try {
+			// --- Создаем новый объект SSH2 и подключаемся к серверу --- //
+			$ssh = new SSH2($v['host']);
+			if (!$ssh->login($v['user'], $v['pass'])) {
+				goto finishWorker;
+			}
+		} catch (\Exception $e) {
+			goto finishWorker;
 		}
 
 	// --- Other OS --- //
 	} else { 
+		try {
+			// --- Создаем новый объект SSH2 и подключаемся к серверу --- //
+			$ssh = new SSH2($v['host']);
+			if (!$ssh->login($v['user'], $v['pass'])) {
+				goto finishWorker;
+			}
+		} catch (\Exception $e) {
+			goto finishWorker;
+		}
 
 		// --- TEMPERATURES --- //
 		try {
