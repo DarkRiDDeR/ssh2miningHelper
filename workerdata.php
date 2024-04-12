@@ -40,7 +40,7 @@ foreach($arr as $v)
 		$ping_result = stripos($ping_result, "Packets: Sent = 1, Received = 1") !== false;
 	} else {
 		$ping_result = shell_exec("ping -c 1 " . $v['host']);
-		$ping_result = stripos($ping_result, "1 packets transmitted, 1 received") !== false;
+		$ping_result = stripos($ping_result, "1 packets transmitted, 1") !== false;
 	}
 
 	if (!$ping_result)
